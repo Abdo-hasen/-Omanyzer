@@ -1,4 +1,4 @@
-# 🧭 Omanyzer — Tourism Booking Platform
+# 🧭 Omanyzer — Tourism & Guide Booking Platform
 
 > A full-featured tourism management platform built with **Laravel 11**, connecting **travelers** with local **guides** across Oman.
 > The system includes a mobile-facing REST API and a fully operational admin dashboard.
@@ -12,7 +12,7 @@
 - OTP-based registration & login via WhatsApp
 - Browse events by city & category
 - Select guides and book across multiple dates
-- Integrated wallet system with AmwalPay payment gateway
+- pay with cash and visa
 - Leave reviews and manage favorites
 
 ### 🧑‍🏫 Guide (Mobile API)
@@ -43,7 +43,7 @@
 | Permissions | Spatie Laravel Permission (admin staff)    |
 | Media       | Spatie Laravel MediaLibrary                |
 | i18n        | Spatie Translatable + Laravel Localization |
-| Payments    | AmwalPay Webhook Integration               |
+| Payments    | AmwalPay Integration                       |
 | Push        | Firebase Cloud Messaging (FCM)             |
 | Export      | Maatwebsite Excel + MisterSpelik PDF       |
 | Monitoring  | Laravel Telescope                          |
@@ -64,7 +64,7 @@
 │   │   └── Traits/           # InteractWithResponse, HasDatatableTrait
 ├── routes/
 │   ├── admin.php             # Admin dashboard routes
-│   └── apis/                 # Versioned API routes (public, user, guide)
+│   └── apis/                 # Versioned API routes (public, user, guide, auth, notification)
 └── resources/views/          # Blade templates
 ```
 
@@ -80,7 +80,15 @@
 
 ---
 
-### 2. Multi-Date Guide Availability Conflict Detection
+### 2. Three-Phase Traveler Booking Flow
+
+**Challenge:** A booking is not a single “submit form” action. The traveler must discover who is available, understand pricing and rules before paying, and only then lock a reservation — without creating half-valid records or race conditions between steps.
+
+**Solution:** The flow has **three simple steps**: (1) list **guides who are free** for the event and dates; (2) **preview** — check the request again and return **price breakdown** for the screen before payment; (3) **save the booking** only when the traveler confirms. The server **checks availability again** on preview and on save, so an outdated pick from an earlier screen cannot become a real booking by mistake.
+
+---
+
+### 3. Multi-Date Guide Availability Conflict Detection
 
 **Challenge:** When a traveler books a guide, they may select multiple dates at once. The system must guarantee that the chosen guide is fully available across *every* selected date — not just some of them. A guide who is booked on even one of those dates must not appear as available.
 
@@ -90,24 +98,13 @@
 
 ---
 
-### 3. Three-Phase Traveler Booking Flow
-
-**Challenge:** A booking is not a single “submit form” action. The traveler must discover who is available, understand pricing and rules before paying, and only then lock a reservation — without creating half-valid records or race conditions between steps.
-
-**Solution:** The flow has **three simple steps**: (1) list **guides who are free** for the event and dates; (2) **preview** — check the request again and return **price breakdown** for the screen before payment; (3) **save the booking** only when the traveler confirms. The server **checks availability again** on preview and on save, so an outdated pick from an earlier screen cannot become a real booking by mistake.
-
----
-
 ## 📸 Screenshots
 
 ### 🖥️ Admin Dashboard
 
-
 ---
 
 ### 📱 Mobile App — Booking Flow
-
-
 
 ---
 
